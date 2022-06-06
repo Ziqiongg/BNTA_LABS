@@ -15,14 +15,16 @@ The major corporation BusinessCorp&#8482; wants to do some analysis of varioius 
 1) Calculate the average salary of all employees
 
 ```sql
-SELECT AVG(salary)
+SELECT AVG(salary) AS company_average
 FROM employees
 ```
 
 2) Calculate the average salary of the employees in each team (hint: you'll need to `JOIN` and `GROUP BY` here)
 
 ```sql
-SELECT AVG(salary) AS average_salary, departments.name AS department_name
+SELECT 
+AVG(salary) AS average_salary, 
+departments.name AS department_name
 FROM employees
 JOIN departments ON departments.id = employees.department_id
 GROUP BY departments.id
@@ -105,7 +107,10 @@ ON average_salary_country.id = employees.id
 1) Find the running total of salary costs as the business has grown and hired more people
 
 ```sql
-SELECT SUM(salary)
+SELECT
+start_date,
+salary,
+SUM(salary) OVER(order by start_Date) AS running_total_salary
 FROM employees
 ```
 
@@ -127,8 +132,8 @@ FROM employees
 
 ```sql
 SELECT 
-country,
-COUNT(*) 
+DISTINCT(country),
+COUNT(*) OVER (PARTITION BY country)
 FROM employees
 GROUP BY country
 ```
@@ -137,13 +142,16 @@ GROUP BY country
 
 ```sql
 SELECT 
-AVG(employees.salary),
-departments.id,
-departments.name
+employees.last_name,
+employees.first_name,
+departments.name,
+employees.start_date,
+employees.salary,
+AVG(employees.salary) OVER(PARTITION BY employees.department_id ORDER BY employees.start_date) AS average_salary
 FROM employees
 INNER JOIN departments
-ON departments.id = employees.department_id
-GROUP BY departments.id
+ON employees.department_id = departments.id
+
 
 ```
 
@@ -160,13 +168,32 @@ GROUP BY departments.id
 1) Find the maximum and minimum salaries
 
 ```sql
-<!--Copy solution here-->
+SELECT 
+MAX(salary),
+MIN(salary)
+FROM employees
+
 ```
 
 2) Find the difference between the maximum and minimum salaries and each employee's own salary
 
 ```sql
-<!--Copy solution here-->
+WITH max_salary (id,max_salary) AS(
+SELECT
+id,
+MAX(salary) AS max_salary,
+FROM employees
+)
+
+SELECT
+id,
+MAX(salary) AS max_salary,
+MIN(salary) AS min_salary
+max_min.max_salary - max_min.min_salary AS gap
+FROM employees
+INNER JOIN max_min
+ON
+
 ```
 
 3) Order the employees by start date. Research how to calculate the **median** salary value and the **standard deviation** in salary values and show how these change as more employees join the company
